@@ -200,18 +200,30 @@ proc set_alarms_for_de1_wake_sleep {} {
 }
 
 proc scheduler_wake {} {
-	msg "Scheduled wake occured at [clock format [clock seconds]]"
+	msg "Scheduled wake occurred at [clock format [clock seconds]]"
+	
+	# set "keep awake" flag if user has chosen new scheduler logic
+	if {[ifexists ::settings(scheduler_logic)] == 1} {
+                set ::scheduler_awake 1
+        }
+	
 	start_idle
 
-	# after alarm has occured go ahead and set the alarm for tommorrow
+	# after alarm has occurred go ahead and set the alarm for tommorrow
 	after 2000 set_alarms_for_de1_wake_sleep
 }
 
 proc scheduler_sleep {} {
-	msg "Scheduled sleep occured at [clock format [clock seconds]]"
-	start_sleep
-
-	# after alarm has occured go ahead and set the alarm for tommorrow
+	msg "Scheduled end occurred at [clock format [clock seconds]]"
+	
+	# if user has chosen new scheduler logic, clear "keep awake" flag (which will allow machine to sleep per idle timer), else immediately sleep
+	if {[ifexists ::settings(scheduler_logic)] == 1} {
+                unset -nocomplain ::scheduler_awake
+        } else {
+		start_sleep
+	}
+	
+	# after alarm has occurred go ahead and set the alarm for tommorrow
 	after 2000 set_alarms_for_de1_wake_sleep
 }
 
